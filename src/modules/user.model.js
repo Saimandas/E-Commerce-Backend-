@@ -18,7 +18,7 @@ const userSchema= new Schema({
         unique:true,
         lowercase:true
     },
-    avtar:{
+    avatar:{
         type:String
     },
     address:[{

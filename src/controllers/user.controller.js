@@ -1,21 +1,30 @@
 import { User } from "../modules/user.model.js";
-import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import bcryptjs from 'bcryptjs'
 import Jwt from 'jsonwebtoken'
-const register= async(req,res)=>{
+import uploadFile from "../utils/cloudnary.js";
+const register= async (req,res)=>{
     try {
       const {username,email,password}=req.body;
       const user = await User.findOne({
         $or:[{username},{email},{password}]
       })
       if (user) {
-        throw new ApiError(200,"user already exists")
+       return res.status(400).json({
+        message:"user already exists"
+       })
       }
+
+      const multerUrl= req.file?.path
+      const avatarUrl=await uploadFile(multerUrl);
+      if (!avatarUrl) {
+        return res.status(500).json({message:"Failed to upload image"})
+      }
+
       const salt= await bcryptjs.genSalt(10)
       const hashedPassword= await bcryptjs.hash(password,salt)
       const newUser= new User({
-        email,username,password:hashedPassword
+        email,username,password:hashedPassword,avatar:avatarUrl
       })
 
       const savedUser= await newUser.save()
@@ -29,7 +38,9 @@ const register= async(req,res)=>{
 
 
     } catch (error) {
-        console.log(error);
+      return res.status(500).json({
+        message:"something went wrong",error
+       })
     }
 }
 
@@ -38,11 +49,15 @@ const login=async(req,res)=>{
     const {email,password}= req.body
     const user= await User.findOne({email})
     if (!user) {
-     throw new ApiError(402,"user does not exists")
+      return res.status(400).json({
+        message:"user doesn't exists"
+       })
     }
     const isPasswordCorrect= await bcryptjs.compare(password,user.password)
     if (!isPasswordCorrect) {
-      throw new ApiError(402,"password is incorrect")
+      return res.status(402).json({
+        message:"password is incorrect"
+       })
     }
 
     const tokenData= {
@@ -63,11 +78,12 @@ const login=async(req,res)=>{
     )
 
   } catch (error) {
+    console.log(error);
     throw new ApiError(500,error)
   }
 }
 
-const logout= async 
+
 export{
-    register
+    register,login
 }
