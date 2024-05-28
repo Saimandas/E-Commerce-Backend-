@@ -21,14 +21,8 @@ const userSchema= new Schema({
     avatar:{
         type:String
     },
-    address:[{
-        type:String
-    }],
     refreshToken:{
         type:String
-    },
-    refreshTokenExpiryDate:{
-        type:Number,
     },
     isAdmin:{
         type:Boolean,
