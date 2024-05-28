@@ -163,6 +163,18 @@ const checkSignUp= async (req,res)=>{
     })
   }
 }
+
+const saveGoogleAuthInfo= async(req,res)=>{
+  try {
+    const user= req.user
+    console.log(user);
+    res.send(user.toString())
+  } catch (error) {
+    return res.status(500).json({
+      message:"something went wrong"
+    })
+  }
+}
 export{
-    register,login,logout,getCurrentUser,checkSignUp
+    register,login,logout,getCurrentUser,checkSignUp,saveGoogleAuthInfo
 }

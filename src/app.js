@@ -27,7 +27,7 @@ app.use(passport.session());
 passport.use(new Strategy({
     clientID:process.env.CLIENT_ID,
     clientSecret:process.env.CLIENT_SECRET,
-    callbackURL:"http://localhost:3000/api/v1/E-Commerce/Google"
+    callbackURL:"http://localhost:3000/api/v1/E-Commerce/saveGoogleAuthInfo"
 },function(accesToken,refereshToken,profile,cb){
     cb(null,profile)
 }))
