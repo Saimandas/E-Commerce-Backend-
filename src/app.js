@@ -39,6 +39,7 @@ passport.deserializeUser(function(user,cb){
     cb(null,user)
 })
 
+export {passport}
 import { router } from './routes/user.routes.js'
 app.use("/api/v1/E-Commerce",router)
 export {app}
