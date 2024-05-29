@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { response } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import passport from 'passport'
@@ -27,8 +27,20 @@ app.use(passport.session());
 passport.use(new Strategy({
     clientID:process.env.CLIENT_ID,
     clientSecret:process.env.CLIENT_SECRET,
-    callbackURL:"http://localhost:3000/api/v1/E-Commerce/saveGoogleAuthInfo"
-},function(accesToken,refereshToken,profile,cb){
+    callbackURL:["http://localhost:3000/api/v1/E-Commerce/saveGoogleAuthInfo","https://campus-notes-tihucollege.onrender.com"]
+},async function(accesToken,refereshToken,profile,cb){
+    try {
+        const user = await User.findOne({
+            email:profile.emails[0].value
+        })
+        if (!user) {
+            new User({
+                
+            })
+        }
+    } catch (error) {
+        return response.status(500).json({error})
+    }
     cb(null,profile)
 }))
 
@@ -41,5 +53,6 @@ passport.deserializeUser(function(user,cb){
 
 export {passport}
 import { router } from './routes/user.routes.js'
+import { User } from './modules/user.model.js'
 app.use("/api/v1/E-Commerce",router)
 export {app}

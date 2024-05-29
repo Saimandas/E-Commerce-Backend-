@@ -140,14 +140,25 @@ const checkSignUp= async (req,res)=>{
     })
     const {username,password,email}=req.body;
     const userData= {
-      username,password,email
+      signUp:{username,password,email}
     }
     const result = await signUpQuery.safeParse(userData)
-    console.log(result);
+    
     if (!result.success) {
-      const errMsg= result.error.format().signUp?._errors||""
-      console.log(errMsg);
-      return res.status(401).json({succes:false,message:errMsg.length>0?errMsg.join(" ,"):"invalid query params"})
+      const formatedMsg=result.error.format()
+      const errMsg= Object.values(formatedMsg.signUp||"").map((e)=>e._errors)
+      console.log(errMsg.map((e,i)=>e))
+      return res.status(401).json({
+        succes:false,
+        usernameMessage:errMsg.length>0?(errMsg[0]===undefined?"":errMsg[0].toString())
+        :"invalid query params",
+        emailMessage:errMsg.length>0?(errMsg[1]===undefined?"":errMsg[1].toString())
+        :"invalid query params",
+        passwordMessage:errMsg.length>0?(errMsg[2]===undefined?"":errMsg[2].toString())
+        :"invalid query params"
+    
+    })
+      
   }
   const user = await User.findOne({username})
   if (user) {
@@ -156,25 +167,13 @@ const checkSignUp= async (req,res)=>{
   return res.status(200).json(
     new ApiResponse("username is unique")
   )
-  
   } catch (error) {
-    return res.status(500).json({
-      message:"something went wrong"
-    })
-  }
-}
-
-const saveGoogleAuthInfo= async(req,res)=>{
-  try {
-    const user= req.user
-    console.log(user);
-    res.send(user.toString())
-  } catch (error) {
+    console.log(error);
     return res.status(500).json({
       message:"something went wrong"
     })
   }
 }
 export{
-    register,login,logout,getCurrentUser,checkSignUp,saveGoogleAuthInfo
+    register,login,logout,getCurrentUser,checkSignUp
 }
