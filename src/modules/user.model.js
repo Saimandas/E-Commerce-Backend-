@@ -27,7 +27,25 @@ const userSchema= new Schema({
     isAdmin:{
         type:Boolean,
         default:false
-    }
+    },
+    role: {
+        type: String,
+        enum: ['buyer', 'seller'],
+        required: [true, "role is required"]
+    },
+    storeAddress: {
+        type: String,
+        required: function() { return this.role === 'seller'; }
+    },
+    storeName: {
+        type: String,
+        required: function() { return this.role === 'seller'; }
+    },
+    
+    contactInfo: {
+        type: String,
+        required: function() { return this.role === 'seller'; }
+    },
 })
 
 export const User= mongoose.model("User",userSchema)

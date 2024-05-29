@@ -7,7 +7,7 @@ import { z } from "zod";
 import {signUpSchema} from '../schema/signUpSchema.js'
 const register= async (req,res)=>{
     try {
-      const {username,email,password}=req.body;
+      const {username,email,password,role}=req.body;
       const user = await User.findOne({
         $or:[{username},{email},{password}]
       })
@@ -26,7 +26,13 @@ const register= async (req,res)=>{
       const salt= await bcryptjs.genSalt(10)
       const hashedPassword= await bcryptjs.hash(password,salt)
       const newUser= new User({
-        email,username,password:hashedPassword,avatar:avatarUrl
+        email,username,password:hashedPassword,avatar:avatarUrl,
+        role,
+            ...(role === 'seller' && {
+                storeName: req.body.storeName,
+                storeAddress: req.body.storeAddress,
+                contactInfo: req.body.contactInfo,
+            }),
       })
 
       const savedUser= await newUser.save()

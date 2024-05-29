@@ -23,6 +23,11 @@ const productSchema= new Schema({
     owner:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
+    },
+    stock:{
+        type:Number,
+        required:true,
+        default:10
     }
 })
 
