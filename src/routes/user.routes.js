@@ -12,6 +12,11 @@ router.route("/logout").get(isLoggedIn,logout)
 router.route("/getCurrentUser").get(isLoggedIn,getCurrentUser)
 router.route("/checkSignUp").get(checkSignUp)
 router.route("/authGoogle").get(passport.authenticate("google",{scope:["profile","email"]}));
+router.route("/abc").get(passport.authenticate("google",{scope:["profile","email"]}),(req,res)=>{
+    req.logOut(); // Logout from Google
+    console.log("Logout initiated");
+    res.send("Logout initiated");
+})
 router.route('/googleCallback').get(passport.authenticate("google",{failureRedirect:"/login"}),(req,res)=>{
     if (req.isAuthenticated) {
         res.redirect("https://www.google.com/")

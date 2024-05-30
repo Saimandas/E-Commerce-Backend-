@@ -25,38 +25,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new Strategy({
-    clientID:process.env.CLIENT_ID,
-    clientSecret:process.env.CLIENT_SECRET,
-    callbackURL:"http://localhost:3000/api/v1/E-Commerce/users/googleCallback"
-},async function(accesToken,refereshToken,profile,cb){
-    try {
-        let user = await User.findOne({ email: profile.emails[0].value, role: "buyer" });
-        console.log(user);
-        if (!user) {
-           const newUser= new User({
-                email:profile.emails[0].value,
-                username:profile.displayName,
-                avatar:profile.photos[0].value,
-                role:"buyer",
-            })
-            const savedUser= newUser.save({validateBeforeSave:false})
-            console.log(savedUser);
-           return cb(null,savedUser)
-        }
-        cb(null,user)
-      //  return cb(new Error("Username already exists"))
-    } catch (error) {
-        cb(error)
-    }
-}))
 
-passport.serializeUser(function(user,cb){
-    cb(null,user)
-})
-passport.deserializeUser(function(user,cb){
-    cb(null,user)
-})
 
 export {passport}
 import { router } from './routes/user.routes.js'
