@@ -1,26 +1,42 @@
-import { Product } from "../modules/Product.model"
-import { Category } from "../modules/category.model"
-import { User } from "../modules/user.model"
-import { ApiResponse } from "../utils/ApiResponse"
+import { Product } from "../modules/Product.model.js"
+import { Category } from "../modules/category.model.js"
+import { User } from "../modules/user.model.js"
+import { ApiResponse } from "../utils/ApiResponse.js"
+import uploadFile from "../utils/cloudnary.js"
 
 const addProducts= async(req,res)=>{
     
     try {
-        const {name,category,price,description,quantity,stock}=req.body
-        const userId=req.user._id
+        const {name,category,price,description,stock}=req.body
+        const userId=req.userId
         const user= await User.findById(userId)
         if (user.role==="buyer") {
             return res.status(403).json({ message: "only seller add product" });
         }
-
+        const filesLenght= req.files.productImg.length
+        let files=[];
+        for (let i = 0; i<filesLenght; i++) {
+            files[i]=req.files.productImg[i].path
+            console.log(files);
+            
+        }
+       
+        const productImg=[]
+        for(let i=0;i<filesLenght;i++){
+            productImg[i]= await uploadFile(files[i]);
+            
+        }
         const product= await new Product({
             name,
             price,
             description,
-            quantity,
             owner:userId,
-            stock
+            stock,
+            productImg:productImg.map((e)=>{
+                return e
+            })
         })
+        
 
         const categorySchema= await new Category({
             name:category
@@ -43,7 +59,23 @@ const addProducts= async(req,res)=>{
 
 const editSellersProfile= async (req,res)=>{
  try {
-    
+    const {_id,storeaddress,storeName}= req.body
+    const user= await User.findById(_id);
+    if (!user.role==="seller") {
+        return res.status(500).json({message:"seller doesn't exist"});
+    }
+    const updateUser= await User.findByIdAndUpdate(user._id,{
+        storeAddress,
+        storeName
+    })
+    const savedUser= await updateUser.save()
+    if (!savedUser) {
+        return res.status(500).json({message:"user updation failed"});
+    }
+    return res.status(200).json(
+        new ApiResponse("user updated succesfully",savedUser)
+    )
+
  } catch (error) {
     return res.status(500).json({message:"something went wrong",error:error.message})
  }
@@ -75,4 +107,8 @@ const deleteProduct= async (req,res)=>{
    } catch (error) {
     return res.status(500).json({message:"something went wrong",error:error.message})
    }
+}
+
+export {
+    addProducts,editSellersProfile,updateStock,deleteProduct
 }

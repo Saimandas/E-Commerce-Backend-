@@ -16,10 +16,6 @@ const productSchema= new Schema({
         type:Number,
         default:0
     },
-    quantity:{
-        type:Number,
-        default:0
-    },
     owner:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
@@ -28,7 +24,11 @@ const productSchema= new Schema({
         type:Number,
         required:true,
         default:10
-    }
+    },
+    productImg:[{
+        type:String,
+        required:true
+    }]
 })
 
 export const Product= mongoose.model("Product",productSchema)

@@ -1,9 +1,10 @@
-import express, { response } from 'express'
+import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import passport from 'passport'
 import session from 'express-session'
 import { Strategy  } from 'passport-google-oauth20'
+import { User } from './modules/user.model.js'
 const app= express()
 
 
@@ -27,21 +28,27 @@ app.use(passport.session());
 passport.use(new Strategy({
     clientID:process.env.CLIENT_ID,
     clientSecret:process.env.CLIENT_SECRET,
-    callbackURL:["http://localhost:3000/api/v1/E-Commerce/saveGoogleAuthInfo","https://campus-notes-tihucollege.onrender.com"]
+    callbackURL:"http://localhost:3000/api/v1/E-Commerce/users/googleCallback"
 },async function(accesToken,refereshToken,profile,cb){
     try {
-        const user = await User.findOne({
-            email:profile.emails[0].value
-        })
+        let user = await User.findOne({ email: profile.emails[0].value, role: "buyer" });
+        console.log(user);
         if (!user) {
-            new User({
-                
+           const newUser= new User({
+                email:profile.emails[0].value,
+                username:profile.displayName,
+                avatar:profile.photos[0].value,
+                role:"buyer",
             })
+            const savedUser= newUser.save({validateBeforeSave:false})
+            console.log(savedUser);
+           return cb(null,savedUser)
         }
+        cb(null,user)
+      //  return cb(new Error("Username already exists"))
     } catch (error) {
-        return response.status(500).json({error})
+        cb(error)
     }
-    cb(null,profile)
 }))
 
 passport.serializeUser(function(user,cb){
@@ -53,6 +60,7 @@ passport.deserializeUser(function(user,cb){
 
 export {passport}
 import { router } from './routes/user.routes.js'
-import { User } from './modules/user.model.js'
-app.use("/api/v1/E-Commerce",router)
+app.use("/api/v1/E-Commerce/users",router)
+import {sellerRouter} from './routes/seller.router.js'
+app.use("/api/v1/E-Commerce/seller",sellerRouter)
 export {app}
