@@ -11,7 +11,7 @@ const addProducts= async(req,res)=>{
         const userId=req.userId
         const user= await User.findById(userId)
         if (user.role==="buyer") {
-            return res.status(403).json({ message: "only seller add product" });
+            return res.status(403).json({ message: "only seller can add product" });
         }
         const filesLenght= req.files.productImg.length
         let files=[];
@@ -59,16 +59,17 @@ const addProducts= async(req,res)=>{
 
 const editSellersProfile= async (req,res)=>{
  try {
-    const {_id,storeaddress,storeName}= req.body
+    const {_id,storeAddress,storeName,contactInfo}= req.body
     const user= await User.findById(_id);
     if (!user.role==="seller") {
         return res.status(500).json({message:"seller doesn't exist"});
     }
     const updateUser= await User.findByIdAndUpdate(user._id,{
         storeAddress,
-        storeName
-    })
-    const savedUser= await updateUser.save()
+        storeName,
+        contactInfo
+    }).select("-password -refreshToken")
+    const savedUser= await updateUser.save({validateBeforeSave:false})
     if (!savedUser) {
         return res.status(500).json({message:"user updation failed"});
     }
@@ -77,6 +78,7 @@ const editSellersProfile= async (req,res)=>{
     )
 
  } catch (error) {
+    console.log(error);
     return res.status(500).json({message:"something went wrong",error:error.message})
  }
 }
@@ -90,6 +92,9 @@ const updateStock= async (req,res)=>{
       if (!updateProduct) {
         return res.status(500).json({message:"something went wrong while updating the product"})
       }
+      return res.status(200).json(
+        new ApiResponse("stocks updated",updateProduct)
+      )
     } catch (error) {
         return res.status(500).json({message:"something went wrong",error:error.message})
     }

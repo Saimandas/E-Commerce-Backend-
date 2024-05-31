@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { addProducts, deleteProduct } from '../controllers/products.controller.js'
+import { addProducts, deleteProduct, editSellersProfile, updateStock } from '../controllers/products.controller.js'
 import { upload } from "../middlewares/multer.js";
 import {isLoggedIn} from '../middlewares/jwt.js'
 
@@ -14,6 +14,7 @@ sellerRouter.route('/addProducts').post(
         maxCount:5
     }])
     ,isLoggedIn,addProducts)
-sellerRouter.route('/deleteProducts').delete(isLoggedIn,deleteProduct)
-
+sellerRouter.route('/deleteProducts').post(isLoggedIn,deleteProduct)
+sellerRouter.route("/editSellerProfile").post(editSellersProfile)
+sellerRouter.route("/updateStocks").post(updateStock)
 export{sellerRouter}

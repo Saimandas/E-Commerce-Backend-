@@ -55,13 +55,17 @@ const register= async (req,res)=>{
 const login=async(req,res)=>{
   try {
     const {email,password}= req.body
+    console.log(req.body);
     const user= await User.findOne({email})
+    console.log(user);
     if (!user) {
       return res.status(400).json({
         message:"user doesn't exists"
        })
     }
+    console.log(user);
     const isPasswordCorrect= await bcryptjs.compare(password,user.password)
+    console.log(isPasswordCorrect);
     if (!isPasswordCorrect) {
       return res.status(402).json({
         message:"password is incorrect"
@@ -84,10 +88,11 @@ const login=async(req,res)=>{
     .cookie("accesToken",accesToken,option)
     .cookie("refreshToken",refereshToken,option)
     .json(
-      new ApiResponse("user logged in succesfully")
+      new ApiResponse("user logged in succesfully",savedUser)
     )
 
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       message:"something went wrong"
     })
@@ -144,28 +149,26 @@ const checkSignUp= async (req,res)=>{
     const signUpQuery= z.object({
       signUp:signUpSchema
     })
-    const {username,password,email}=req.body;
+    const {username,email,password}=req.body;
     const userData= {
-      signUp:{username,password,email}
+      signUp:{username,email,password}
     }
     const result = await signUpQuery.safeParse(userData)
     
+     
     if (!result.success) {
-      const formatedMsg=result.error.format()
-      const errMsg= Object.values(formatedMsg.signUp||"").map((e)=>e._errors)
-      console.log(errMsg.map((e,i)=>e))
-      return res.status(401).json({
-        succes:false,
-        usernameMessage:errMsg.length>0?(errMsg[0]===undefined?"":errMsg[0].toString())
-        :"invalid query params",
-        emailMessage:errMsg.length>0?(errMsg[1]===undefined?"":errMsg[1].toString())
-        :"invalid query params",
-        passwordMessage:errMsg.length>0?(errMsg[2]===undefined?"":errMsg[2].toString())
-        :"invalid query params"
-    
-    })
+      const formattedMsg = result.error.format();
+      const usernameErrors = formattedMsg.signUp?.username?._errors || ["Invalid username"];
+      const emailErrors = formattedMsg.signUp?.email?._errors || ["Invalid email"];
+      const passwordErrors = formattedMsg.signUp?.password?._errors || ["Invalid password"];
       
-  }
+      return res.status(401).json({
+        success: false,
+        usernameMessage: usernameErrors[0],
+        emailMessage: emailErrors[0],
+        passwordMessage: passwordErrors[0]
+      });
+    }
   const user = await User.findOne({username})
   if (user) {
     return res.status(402).json( new ApiResponse("username is already taken"))

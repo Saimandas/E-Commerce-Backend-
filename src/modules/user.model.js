@@ -31,7 +31,7 @@ const userSchema= new Schema({
     role: {
         type: String,
         enum: ['buyer', 'seller'],
-        required: [true, "role is required"]
+        default:"buyer"
     },
     storeAddress: {
         type: String,
