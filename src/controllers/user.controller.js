@@ -5,6 +5,7 @@ import Jwt from 'jsonwebtoken'
 import uploadFile from "../utils/cloudnary.js";
 import { z } from "zod";
 import {signUpSchema} from '../schema/signUpSchema.js'
+import { Cart } from "../modules/cart.model.js";
 const register= async (req,res)=>{
     try {
       const {username,email,password,role}=req.body;
@@ -181,6 +182,30 @@ const checkSignUp= async (req,res)=>{
     return res.status(500).json({
       message:"something went wrong"
     })
+  }
+}
+
+const addToCart= async (req,res)=>{
+  try {
+    const {productId,quantity}= req.body;
+    const userId=req.userId;
+    const cart= await new Cart({
+      user:userId,
+      items:[{product:productId,quantity}]
+      
+    });
+
+    const savedCart= await cart.save();
+    if (!savedCart) {
+      return res.status(500).json({message:"product failed to added to cart"})
+    }
+
+    return res.status(200).json(
+      new ApiResponse("added to cart succesfully",savedCart)
+    )
+
+  } catch (error) {
+    return res.status(500).json({message:"internel server error"})
   }
 }
 export{
