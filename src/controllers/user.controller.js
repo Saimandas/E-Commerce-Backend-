@@ -6,6 +6,7 @@ import uploadFile from "../utils/cloudnary.js";
 import { z } from "zod";
 import {signUpSchema} from '../schema/signUpSchema.js'
 import { Cart } from "../modules/cart.model.js";
+import { WishList } from "../modules/wishlist.model.js";
 const register= async (req,res)=>{
     try {
       const {username,email,password,role}=req.body;
@@ -208,6 +209,29 @@ const addToCart= async (req,res)=>{
     return res.status(500).json({message:"internel server error"})
   }
 }
+
+const addToWishList= async (req,res)=>{
+  try {
+    const {productId}=req.body; 
+    const userId= req.userId
+    const isAlreadyListed= await WishList.find({user:userId, items:productId});
+    if (isAlreadyListed) {
+      return res.status(400).json({message:"item already is in wishlist"})
+    }
+
+    const itemAddedToWishlist= await new WishList({
+      user:userId,
+      items:productId
+    })
+    const savedItem= await itemAddedToWishlist.save();
+
+   return res.status(200).json(
+      new ApiResponse("items added to wishlist succesfully")
+    )
+  } catch (error) {
+    return res.status(500).json({message:"internel server error"})
+  }
+}
 export{
-    register,login,logout,getCurrentUser,checkSignUp
+    register,login,logout,getCurrentUser,checkSignUp,addToCart,addToWishList
 }
