@@ -21,10 +21,28 @@ const orderSchema= new Schema({
             },
         }]
     },
-    address:{
-        type:String,
-        required:true
-    },
+    shippingInfo: {
+        address: {
+          type: String,
+          required: true,
+        },
+        city: {
+          type: String,
+          required: true,
+        },
+        state: {
+          type: String,
+          required: true,
+        },
+        country: {
+          type: String,
+          required: true,
+        },
+        pinCode: {
+          type: Number,
+          required: true,
+        },
+      },
     status:{
         type:String,
         enum:["PENDING","CANCELLED","DELIVERED"],

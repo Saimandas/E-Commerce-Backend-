@@ -226,7 +226,7 @@ const addToWishList= async (req,res)=>{
     const savedItem= await itemAddedToWishlist.save();
 
    return res.status(200).json(
-      new ApiResponse("items added to wishlist succesfully")
+      new ApiResponse("items added to wishlist succesfully",savedItem)
     )
   } catch (error) {
     return res.status(500).json({message:"internel server error"})
