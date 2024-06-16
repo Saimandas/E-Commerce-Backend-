@@ -1,9 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
 const orderSchema= new Schema({
-    orderPrice:{
+    Price:{
         type:Number,
         required:true
+    },
+    finalPrice:{
+      type:Number,
+      required:true
     },
     customer:{
         type:mongoose.Schema.Types.ObjectId,
@@ -42,6 +46,10 @@ const orderSchema= new Schema({
           type: Number,
           required: true,
         },
+      },
+      discount: {
+        type: Number,
+        required: true,
       },
     status:{
         type:String,
