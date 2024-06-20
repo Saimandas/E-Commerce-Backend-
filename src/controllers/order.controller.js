@@ -1,8 +1,8 @@
 import { Product } from "../modules/Product.model";
-import { Coupon } from "../modules/cupon.model";
 import { Order } from "../modules/oreder.model";
 import { ApiResponse } from "../utils/ApiResponse";
 import { getFinalValue } from "../utils/isCuponCodeValid";
+import { reduceStocks } from "../utils/stocks";
 
 const makeOrder= async(req,res)=>{
     try {
@@ -47,8 +47,22 @@ const cancelOrder= async function(req,res){
         // if (!deletedOrder) {
         //     return res.status(500).json({succes:false,message:"something went wrong while deleted order"});
         // }
-
+        
         const cancelOrder= await Order.findByIdAndUpdate(orderId,{status:"CANCELLED"})
+        let product_id=[]
+        let stocks=[]
+        for (let i = 0; i < cancelOrder.type.length; i++) {
+             product_id.push(cancelOrder.type[i].productId);
+            stocks.push(reduceStocks(product_id(i)));
+            
+        }
+        if (!stocks.length>0) {
+            return res.status(500).json({
+                message:"Something went wrong while reducing the stocks"
+            });
+        }    
+        
+    
         return res.status(200).json(
             ApiResponse("Order Cancelled Succesfully",cancelOrder)
         );
