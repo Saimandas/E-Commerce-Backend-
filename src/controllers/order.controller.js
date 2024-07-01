@@ -1,14 +1,22 @@
-import { Product } from "../modules/Product.model";
-import { Order } from "../modules/oreder.model";
-import { ApiResponse } from "../utils/ApiResponse";
-import { getFinalValue } from "../utils/isCuponCodeValid";
-import { reduceStocks } from "../utils/stocks";
+import { Product } from "../modules/Product.model.js";
+import { Order } from "../modules/oreder.model.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { getFinalValue, isCuponCodeValid } from "../utils/isCuponCodeValid.js";
+import { reduceStocks } from "../utils/stocks.js";
 
 const makeOrder= async(req,res)=>{
     try {
         const {productId,quantity,orderPrice,address,pinCode,city,country,state,cuponCode}=req.body;
-        const finalPrice= await getFinalValue(orderPrice,cuponCode);
-        await Product.findByIdAndUpdate(productId,{$inc:{stock:-quantity}});
+        let finalPrice;
+       const isValid =await isCuponCodeValid(cuponCode);
+       console.log(isValid);
+       if (isValid) {
+       finalPrice=await getFinalValue(orderPrice,cuponCode);
+       console.log(finalPrice);
+       }else{
+       finalPrice=orderPrice
+       } 
+       await Product.findByIdAndUpdate(productId,{$inc:{stock:-quantity}});
         const newOrder= await new Order({
             customer:req.userId,
             orderItem:
@@ -34,7 +42,7 @@ const makeOrder= async(req,res)=>{
     }
 
     const savedOrder= await newOrder.save();
-    return res.status.json(ApiResponse("order created succesfully",savedOrder));
+    return res.status(200).json( new ApiResponse("order created succesfully",savedOrder));
     } catch (error) {
         return res.status(500).json({message:"Internal server error",error:error.message})
     }
@@ -54,7 +62,6 @@ const cancelOrder= async function(req,res){
         for (let i = 0; i < cancelOrder.type.length; i++) {
              product_id.push(cancelOrder.type[i].productId);
             stocks.push(reduceStocks(product_id(i)));
-            
         }
         if (!stocks.length>0) {
             return res.status(500).json({

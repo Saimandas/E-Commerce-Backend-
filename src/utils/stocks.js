@@ -1,4 +1,4 @@
-import { Product } from "../modules/Product.model"
+import { Product } from "../modules/Product.model.js"
 
 export async function reduceStocks(id,num=1){
     try {
