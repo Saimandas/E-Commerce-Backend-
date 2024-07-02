@@ -32,6 +32,7 @@ const addProducts= async(req,res)=>{
             description,
             owner:userId,
             stock,
+            avilableStock:stock,
             productImg:productImg.map((e)=>{
                 return e
             })

@@ -3,7 +3,7 @@ import { checkSignUp, getCurrentUser, login, logout, register } from "../control
 import { addProducts, deleteProduct } from '../controllers/products.controller.js'
 import { upload } from "../middlewares/multer.js";
 import {isLoggedIn} from '../middlewares/jwt.js'
-import { makeOrder } from "../controllers/order.controller.js";
+import { makeOrder,cancelOrder } from "../controllers/order.controller.js";
 //import {passport} from '../app.js'
 const router= Router()
 
@@ -13,6 +13,7 @@ router.route("/logout").get(isLoggedIn,logout)
 router.route("/getCurrentUser").get(isLoggedIn,getCurrentUser)
 router.route("/checkSignUp").get(checkSignUp)
 router.route("/makeOrder").post(makeOrder)
+router.route("/cancel-order").post(cancelOrder)
 // router.route("/authGoogle").get(passport.authenticate("google",{scope:["profile","email"]}));
 // router.route("/abc").get(passport.authenticate("google",{scope:["profile","email"]}),(req,res)=>{
 //     req.logOut(); // Logout from Google

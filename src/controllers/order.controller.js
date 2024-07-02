@@ -2,7 +2,7 @@ import { Product } from "../modules/Product.model.js";
 import { Order } from "../modules/oreder.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { getFinalValue, isCuponCodeValid } from "../utils/isCuponCodeValid.js";
-import { reduceStocks } from "../utils/stocks.js";
+import { increaseStock, reduceStocks } from "../utils/stocks.js";
 
 const makeOrder= async(req,res)=>{
     try {
@@ -16,13 +16,16 @@ const makeOrder= async(req,res)=>{
        }else{
        finalPrice=orderPrice
        } 
-       await Product.findByIdAndUpdate(productId,{$inc:{stock:-quantity}});
+      const product= await Product.findByIdAndUpdate(productId,{$inc:{avilableStock:-quantity}});
+      if (!product) {
+        return res.status(404).json({message:"Product doesn't exits"});
+      }
         const newOrder= await new Order({
             customer:req.userId,
             orderItem:
                 [
                     {
-                        productId,
+                        product:product._id,
                         quantity
                     }
                 ],
@@ -57,13 +60,20 @@ const cancelOrder= async function(req,res){
         // }
         
         const cancelOrder= await Order.findByIdAndUpdate(orderId,{status:"CANCELLED"})
-        let product_id=[]
-        let stocks=[]
-        for (let i = 0; i < cancelOrder.type.length; i++) {
-             product_id.push(cancelOrder.type[i].productId);
-            stocks.push(reduceStocks(product_id(i)));
+        //console.log(cancelOrder);
+        if (!cancelOrder) {
+            return res.status(404).json({message:"Invalid Order"})
         }
-        if (!stocks.length>0) {
+        let product_id=[]
+        let isIncrease;
+        for (let i = 0; i < cancelOrder.orderItem.length; i++) {
+             product_id.push(cancelOrder.orderItem);
+        }
+       // console.log(product_id);
+        product_id.map((e)=>{
+            isIncrease= increaseStock(e[0].product,e[0].quantity)
+        })
+        if (!isIncrease){
             return res.status(500).json({
                 message:"Something went wrong while reducing the stocks"
             });
@@ -71,7 +81,7 @@ const cancelOrder= async function(req,res){
         
     
         return res.status(200).json(
-            ApiResponse("Order Cancelled Succesfully",cancelOrder)
+           new ApiResponse("Order Cancelled Succesfully",cancelOrder)
         );
     } catch (error) {
         return res.status(500).json({message:"Internal server error",error:error.message})

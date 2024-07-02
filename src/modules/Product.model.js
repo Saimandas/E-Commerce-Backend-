@@ -25,6 +25,9 @@ const productSchema= new Schema({
         required:true,
         default:10
     },
+    avilableStock:{
+        type:Number,
+    },
     productImg:[{
         type:String,
         required:true
