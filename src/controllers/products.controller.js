@@ -93,6 +93,7 @@ const updateStock= async (req,res)=>{
       if (!updateProduct) {
         return res.status(500).json({message:"something went wrong while updating the product"})
       }
+     
       return res.status(200).json(
         new ApiResponse("stocks updated",updateProduct)
       )
@@ -115,6 +116,28 @@ const deleteProduct= async (req,res)=>{
    }
 }
 
+const getAllProducts= async (req,res)=>{
+             try {
+               const data= await Product.find();
+               console.log(data);
+               return res.status(200).json(
+                new ApiResponse("product deleted succesfylly",data)
+             )
+             } catch (error) {
+                return res.status(500).json({message:"something went wrong",error:error.message}) 
+             }
+}
+const getProductsByCategory=async (req,res)=>{
+    try {
+      const {category_id}=req.body;
+      const products= await Product.find({category:category_id});
+      return res.status(200).json(
+        new ApiResponse("product deleted succesfylly",products)
+     )
+    } catch (error) {
+        return res.status(500).json({message:"something went wrong",error:error.message}) 
+    }
+}
 export {
-    addProducts,editSellersProfile,updateStock,deleteProduct
+    addProducts,editSellersProfile,updateStock,deleteProduct,getAllProducts,getProductsByCategory
 }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { checkSignUp, getCurrentUser, login, logout, register } from "../controllers/user.controller.js";
-import { addProducts, deleteProduct } from '../controllers/products.controller.js'
+import { addProducts, deleteProduct, getAllProducts, getProductsByCategory } from '../controllers/products.controller.js'
 import { upload } from "../middlewares/multer.js";
 import {isLoggedIn} from '../middlewares/jwt.js'
 import { makeOrder,cancelOrder } from "../controllers/order.controller.js";
@@ -14,6 +14,8 @@ router.route("/getCurrentUser").get(isLoggedIn,getCurrentUser)
 router.route("/checkSignUp").get(checkSignUp)
 router.route("/makeOrder").post(makeOrder)
 router.route("/cancel-order").post(cancelOrder)
+router.route("/products").get(getAllProducts)
+router.route("/category").get(getProductsByCategory)
 // router.route("/authGoogle").get(passport.authenticate("google",{scope:["profile","email"]}));
 // router.route("/abc").get(passport.authenticate("google",{scope:["profile","email"]}),(req,res)=>{
 //     req.logOut(); // Logout from Google
