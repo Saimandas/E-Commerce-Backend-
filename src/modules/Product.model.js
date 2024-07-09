@@ -31,7 +31,12 @@ const productSchema= new Schema({
     productImg:[{
         type:String,
         required:true
-    }]
+    }],
+    categoryName:{
+        type:String
+    }
 })
+
+
 
 export const Product= mongoose.model("Product",productSchema)

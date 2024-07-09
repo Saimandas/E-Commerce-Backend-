@@ -26,6 +26,7 @@ const addProducts= async(req,res)=>{
             productImg[i]= await uploadFile(files[i]);
             
         }
+      
         const product= await new Product({
             name,
             price,
@@ -34,18 +35,34 @@ const addProducts= async(req,res)=>{
             stock,
             avilableStock:stock,
             productImg:productImg.map((e)=>{
-                return e
+               return e
             })
         })
+       
         
-
+      
         const categorySchema= await new Category({
             name:category
         })
-        product.category=categorySchema._id
+        await categorySchema.save()  
+        product.category=categorySchema._id;
+        product.categoryName=categorySchema.name;
+        const savedProduct= await product.save()  
+    //     const categoryOf= await Product.aggregate([{
+    //         $lookup:{
+    //           from:"categories",
+    //           localField:"category" ,
+    //           foreignField:"_id",
+    //           as: "categories_Field"
+    //         }},{
+    //         $addFields: {
+    //           categoryOf:{$arrayElemAt:["$categories_Field.name",0]}
+    //         }
+    //       }])
+    //    console.log("abc",categoryOf);
 
-        const savedProduct= await product.save()
-        await categorySchema.save()
+      
+       // console.log(savedProduct);
         if (!savedProduct) {
             return res.status(500).json({message:"cant add product"})
         }
@@ -131,6 +148,9 @@ const getProductsByCategory=async (req,res)=>{
     try {
       const {category_id}=req.body;
       const products= await Product.find({category:category_id});
+      if (!products) {
+        return res.status(500).json({succes:false,message:"something went wrong while getting the products"})
+      }
       return res.status(200).json(
         new ApiResponse("product deleted succesfylly",products)
      )
@@ -138,6 +158,31 @@ const getProductsByCategory=async (req,res)=>{
         return res.status(500).json({message:"something went wrong",error:error.message}) 
     }
 }
+const serachProducts= async (req,res)=>{
+    try {
+        const name= req.params.name;
+        
+          
+
+        
+        await Product.createIndexes({name:"text",categoryName:"text"});
+       
+        const products= await Product.find({
+            $text:{
+                $search:name
+            }
+        })
+        if (!products.length>0) {
+            return res.status(404).json({succes:false,message:"products doesn't exists"}); 
+        }
+     
+        return res.status(200).json(
+            new ApiResponse("product founded Succesfully",products)
+         )
+    } catch (error) {
+        return res.status(500).json({message:"something went wrong",error:error.message}) 
+    }
+}
 export {
-    addProducts,editSellersProfile,updateStock,deleteProduct,getAllProducts,getProductsByCategory
+    addProducts,editSellersProfile,updateStock,deleteProduct,getAllProducts,getProductsByCategory,serachProducts
 }
