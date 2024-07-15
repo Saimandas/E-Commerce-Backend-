@@ -2,6 +2,7 @@ import { Product } from "../modules/Product.model.js"
 import { Category } from "../modules/category.model.js"
 import { User } from "../modules/user.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
+import { ApiFeatures} from "../utils/ProductsFeatures.js"
 import uploadFile from "../utils/cloudnary.js"
 
 const addProducts= async(req,res)=>{
@@ -160,18 +161,37 @@ const getProductsByCategory=async (req,res)=>{
 }
 const serachProducts= async (req,res)=>{
     try {
-        const name= req.params.name;
+        const name= req.query.products;
+        console.log(name);
         
           
-
         
         await Product.createIndexes({name:"text",categoryName:"text"});
        
-        const products= await Product.find({
-            $text:{
-                $search:name
-            }
-        })
+        const products=await new ApiFeatures().search(name);
+
+        if (!products.length>0) {
+            return res.status(404).json({succes:false,message:"products doesn't exists"}); 
+        }
+     
+        return res.status(200).json(
+            new ApiResponse("product founded Succesfully",products)
+         )
+    } catch (error) {
+        return res.status(500).json({message:"something went wrong",error:error.message}) 
+    }
+}
+
+const filter=  async (req,res)=>{
+    try {
+        const gt= req.query.gt;
+        const lt= req.query.lt;
+        //console.log(name)
+        console.log(gt,lt);
+        await Product.createIndexes({name:"text",categoryName:"text"});
+       
+        const products=await new ApiFeatures().filter(gt,lt);
+        console.log(products);
         if (!products.length>0) {
             return res.status(404).json({succes:false,message:"products doesn't exists"}); 
         }
@@ -184,5 +204,5 @@ const serachProducts= async (req,res)=>{
     }
 }
 export {
-    addProducts,editSellersProfile,updateStock,deleteProduct,getAllProducts,getProductsByCategory,serachProducts
+    addProducts,editSellersProfile,updateStock,deleteProduct,getAllProducts,getProductsByCategory,serachProducts,filter
 }

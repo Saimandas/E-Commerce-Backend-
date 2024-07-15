@@ -88,4 +88,94 @@ const cancelOrder= async function(req,res){
     }
 }
 
-export {makeOrder,cancelOrder}
+const getAllOrder= async (req,res)=>{
+
+   try {
+     const {userId}=req.body;
+
+     const order= await Order.find({customer:userId});
+     if (!order) {
+        return res.status(402).json({
+            message:"Cant find the order"
+        });
+     }
+     return res.status(200).json(
+        new ApiResponse("Order get succesfully",order)
+     );
+   } catch (error) {
+    return res.status(500).json({message:"Internal server error",error:error.message})
+   }
+
+}
+
+const getSingleOrder= async(req,res)=>{
+    try {
+        const {orderId}= req.body;
+        const order= await Order.findById(orderId);
+        if (!order) {
+            return res.status(402).json({
+                message:"Cant find the order"
+            });
+         }
+
+         return res.status(200).json(
+            new ApiResponse("Order found Succesfully",cancelOrder)
+         );
+        
+    } catch (error) {
+        return res.status(500).json({message:"Internal server error",error:error.message})
+    }
+}
+
+const sellerAllOrder=async (req,res)=>{
+    try {
+        const {seller_id}= req.body;
+        const product= await Product.find({owner:seller_id});
+        if (!product) {
+            return res.status(402).json({
+                succes:false,message:"No products add from this seller"
+            })
+        }
+        console.log(product[0]._id);
+        const orders=await Order.find({orderItem:product[0]._id});
+        console.log(orders);
+        if (!orders) {
+            return res.status(402).json({
+                succes:false,message:"No order Placed"
+            })
+        }
+        console.log(orders
+            );
+        return res.status(200).json(
+           new ApiResponse("Order found Succesfully",orders)
+        );
+    } catch (error) {
+        return res.status(500).json({message:"Internal server error",error:error.message})
+    }
+}
+const proccesOrder= async (req,res)=>{
+    try {
+        const {orderId,state}=req.body;
+        const seller_id= req.seller;
+        const order= await Order.findById(orderId);
+        const product=order.type[0]?.product;
+        const orderSellerInfo=product.owner;
+        if (seller_id!=orderSellerInfo) {
+            return res.status(402).json({
+                message:"Only Products seller can procces orders"
+            });   
+        }
+        if (!order) {
+            return res.status(404).json({
+                message:"Cant find the order"
+            });
+        }
+        order.status=String(state);
+        return res.status(200).json(
+            new ApiResponse(`order ${state} succesfully`)
+         );
+    } catch (error) {
+        return res.status(500).json({message:"Internal server error",error:error.message})
+    }
+}
+export {makeOrder,cancelOrder,getAllOrder,getSingleOrder,proccesOrder,sellerAllOrder}

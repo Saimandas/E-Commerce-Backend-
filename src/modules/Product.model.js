@@ -3,7 +3,9 @@ import mongoose, { Schema } from "mongoose";
 const productSchema= new Schema({
     name:{
         type:String,
-        required:true
+        required:true,
+        maxLength: [30, "Name cannot exceed 30 characters"],
+        minLength: [4, "Name should have more than 4 characters"],
     },
     category:{
         type:mongoose.Schema.Types.ObjectId,
@@ -34,6 +36,9 @@ const productSchema= new Schema({
     }],
     categoryName:{
         type:String
+    },
+    rating:{
+        type:Number,
     }
 })
 

@@ -103,7 +103,7 @@ const login=async(req,res)=>{
 const logout= async (req,res)=>{
   try {
     
-    const userId= req.userId
+    const {userId}= req.body;
     const user= await User.findByIdAndUpdate(userId,{
       refreshToken:null
     })

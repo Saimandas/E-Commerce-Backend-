@@ -13,18 +13,20 @@ const orderSchema= new Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     },
-    orderItem:{
-        type:[{
-            product:{
-                type:mongoose.Schema.Types.ObjectId,
-                ref:"Product"
-            },
-            quantity:{
-                type:Number,
-                required:true
-            },
-        }]
+    orderItem:[{
+      product:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Product"
     },
+    quantity:{
+        type:Number,
+        required:true
+    }
+    }],
+    // sellerId:{
+    //   type:mongoose.Schema.Types.ObjectId,
+    //   ref:"User"
+    // },
     shippingInfo: {
         address: {
           type: String,
