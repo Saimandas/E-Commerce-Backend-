@@ -136,10 +136,10 @@ const sellerAllOrder=async (req,res)=>{
                 succes:false,message:"No products add from this seller"
             })
         }
-        console.log(product[0]._id);
-        const orders=await Order.find({orderItem:product[0]._id});
+        const productIds= product.map((e)=>e._id);
+        const orders= await Order.find({'orderItem.product':{$in:productIds}})
         console.log(orders);
-        if (!orders) {
+        if (orders.length<=0) {
             return res.status(402).json({
                 succes:false,message:"No order Placed"
             })
