@@ -21,8 +21,10 @@ const register= async (req,res)=>{
 
       const multerUrl= req.file?.path
       const avatarUrl=await uploadFile(multerUrl);
-      if (!avatarUrl) {
-        return res.status(500).json({message:"Failed to upload image"})
+      if (multerUrl) {
+        if (!avatarUrl) {
+          return res.status(500).json({message:"Failed to upload image"})
+        }
       }
 
       const salt= await bcryptjs.genSalt(10)
@@ -43,7 +45,7 @@ const register= async (req,res)=>{
       }
   
       return res.status(200).json(
-        new ApiResponse("user registered succesfullt",savedUser)
+        new ApiResponse("user registered succesfully",savedUser)
       )
 
 
@@ -90,7 +92,7 @@ const login=async(req,res)=>{
     .cookie("accesToken",accesToken,option)
     .cookie("refreshToken",refereshToken,option)
     .json(
-      new ApiResponse("user logged in succesfully",savedUser)
+      new ApiResponse("user logged in succesfully",{user:savedUser})
     )
 
   } catch (error) {
@@ -146,6 +148,27 @@ const getCurrentUser= async (req,res)=>{
  }
 }
 
+const checkUsername= async (req,res)=>{
+  try {
+    const username= req.query.username;
+    const isUsernameAvilable= await User.findOne({username})
+    console.log(isUsernameAvilable);
+    if (isUsernameAvilable) {
+      return res.status(404).json( new ApiResponse("username is already taken"))
+    }
+
+    return res.status(200).json(
+      new ApiResponse("Username is unique")
+    );
+    
+
+  } catch (error) {
+    return res.status(500).json({
+      message:"something went wrong",
+      error:error.message
+    })
+  }
+}
 const checkSignUp= async (req,res)=>{
   try {
     const signUpQuery= z.object({
@@ -233,5 +256,5 @@ const addToWishList= async (req,res)=>{
   }
 }
 export{
-    register,login,logout,getCurrentUser,checkSignUp,addToCart,addToWishList
+    register,login,logout,getCurrentUser,checkSignUp,addToCart,addToWishList,checkUsername
 }

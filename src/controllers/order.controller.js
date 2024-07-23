@@ -59,7 +59,8 @@ const cancelOrder= async function(req,res){
         //     return res.status(500).json({succes:false,message:"something went wrong while deleted order"});
         // }
         
-        const cancelOrder= await Order.findByIdAndUpdate(orderId,{status:"CANCELLED"})
+        const cancelOrder= await Order.findByIdAndUpdate(orderId,{status:"CANCELLED"});
+    
         //console.log(cancelOrder);
         if (!cancelOrder) {
             return res.status(404).json({message:"Invalid Order"})
